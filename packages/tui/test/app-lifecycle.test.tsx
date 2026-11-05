@@ -595,7 +595,9 @@ test("automatic rename refreshes the displayed title before settling, even witho
 
     session.title = "Simplify compiler parsing"
     response.resolve(new Response(null, { status: 204 }))
-    await setup.waitForFrame((frame) => frame.includes(session.title), { maxPasses: 60 })
+    await setup.waitForFrame((frame) => frame.includes(session.title) && !frame.includes("Compiler cleanup"), {
+      maxPasses: 60,
+    })
     expect(setup.captureCharFrame()).not.toContain("Compiler cleanup")
   } finally {
     response.resolve(new Response(null, { status: 204 }))

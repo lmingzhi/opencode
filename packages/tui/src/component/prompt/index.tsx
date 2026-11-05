@@ -69,7 +69,6 @@ import { DialogImagePreview } from "../dialog-image-preview"
 import { useDirectoryRecents } from "../../prompt/directory-recents"
 import { directoryRecentValue } from "../../prompt/directory-completion"
 import { useWorkingDirectoryActions } from "../../ui/working-directory-actions"
-import { truncateFilePath } from "../../ui/file-path"
 import { PromptMetadataRow } from "./metadata"
 import { limitLabel, useUsageLimits } from "../usage"
 
@@ -1636,18 +1635,18 @@ export function Prompt(props: PromptProps) {
     if (status() !== "idle") return
     return data.session.get(props.sessionID)?.location
   })
-  const locationLabel = createMemo(() => {
+  const location = createMemo(() => {
     const pending = pendingDirectory()
-    const location = pending ? { directory: pending } : footerLocation()
-    if (!location) return
+    const value = pending ? { directory: pending } : footerLocation()
+    if (!value) return
     const session = props.sessionID ? data.session.get(props.sessionID) : undefined
-    return promptLocationLabel(session ? displayLabel(session) : undefined, location.directory)
+    return { title: session ? displayLabel(session) : undefined, directory: value.directory }
   })
   const [locationWidth, setLocationWidth] = createSignal(dimensions().width)
   const locationLabelDisplay = createMemo(() => {
-    const label = locationLabel()
-    if (!label) return
-    return truncateFilePath(label, locationWidth())
+    const value = location()
+    if (!value) return
+    return promptLocationLabel(value.title, value.directory, locationWidth())
   })
   const locationActions = useWorkingDirectoryActions({
     directory: () => footerLocation()?.directory,

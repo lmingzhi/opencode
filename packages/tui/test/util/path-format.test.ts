@@ -21,7 +21,19 @@ test("puts the session title before the directory basename in the prompt footer"
 })
 
 test("truncates a long session title without hiding the directory basename", () => {
-  expect(promptLocationLabel("a-very-long-session-title-that-does-not-fit", "/workspace")).toBe(
-    "a-very-long-session… · workspace",
+  expect(promptLocationLabel("a-very-long-session-title-that-does-not-fit", "/workspace", 40)).toBe(
+    "a-very-long-session-titl… · workspace",
   )
+})
+
+test("keeps at least 25 title characters and compresses the directory when space is tight", () => {
+  const title = "20261105-p3-用户行为分析-周报-超长标题"
+  const directory = "/Users/me/work/cloud-iflyplus-main-doc"
+  expect(promptLocationLabel(title, directory, 50)).toBe("20261105-p3-用户行为分析-周报-超长… · cloud-iflyp…")
+})
+
+test("shows the full title and directory when they fit", () => {
+  const title = "20261105-p3-用户行为分析-周报"
+  const directory = "/Users/me/work/cloud-iflyplus-main-doc"
+  expect(promptLocationLabel(title, directory, 200)).toBe(`${title} · cloud-iflyplus-main-doc`)
 })
