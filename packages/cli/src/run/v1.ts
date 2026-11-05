@@ -36,6 +36,14 @@ export function runV1Bridge(input: V1RunCommandInput) {
     return Promise.resolve()
   }
 
+  // The V1 CLI has no signal handling of its own: the first Ctrl-C interrupts the Session, a second exits.
+  const controller = new AbortController()
+  const interrupt = () => {
+    if (controller.signal.aborted) process.exit(130)
+    process.exitCode = 130
+    controller.abort()
+  }
+  process.on("SIGINT", interrupt)
   return Effect.runPromise(
     Effect.scoped(
       Effect.gen(function* () {
@@ -43,18 +51,24 @@ export function runV1Bridge(input: V1RunCommandInput) {
           ? explicitEndpoint(input)
           : yield* Standalone.start({ command: input.standaloneCommand })
         yield* Effect.promise(() =>
-          runNonInteractiveWithOptions(nativeInput(input, endpoint), {
-            root: local,
-            directory: attached ? input.directory : local,
-            useServerDirectory: attached && input.directory === undefined,
-            variant: input.variant,
-            attached,
-            compatibility: "v1",
-          }),
+          runNonInteractiveWithOptions(
+            nativeInput(input, endpoint),
+            {
+              root: local,
+              directory: attached ? input.directory : local,
+              useServerDirectory: attached && input.directory === undefined,
+              variant: input.variant,
+              attached,
+              compatibility: "v1",
+            },
+            controller.signal,
+          ),
         )
       }),
     ),
-  ).catch((error) => reportRunError(input, errorMessage(error)))
+  )
+    .catch((error) => reportRunError(input, errorMessage(error)))
+    .finally(() => process.off("SIGINT", interrupt))
 }
 
 function nativeInput(input: V1RunCommandInput, endpoint: Endpoint): RunCommandInput {
