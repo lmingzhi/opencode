@@ -56,9 +56,10 @@ import { useLocation } from "../../context/location"
 import { useArgs } from "../../context/args"
 import { Keymap, type KeymapCommand } from "../../context/keymap"
 import { useInteractivity } from "../../context/interactivity"
-import { abbreviateHome } from "../../runtime"
 import { Slot } from "../../plugin/render"
 import type { SessionInbox } from "@opencode/schema/session-inbox"
+import { displayLabel } from "@opencode/util/session-title-fallback"
+import { promptLocationLabel } from "../../util/path-format"
 import {
   deduplicatePromptImages,
   preserveMentionlessPromptAttachments,
@@ -1639,9 +1640,8 @@ export function Prompt(props: PromptProps) {
     const pending = pendingDirectory()
     const location = pending ? { directory: pending } : footerLocation()
     if (!location) return
-    const directory = abbreviateHome(location.directory, paths.home)
-    const branch = data.location.vcs.info(location)?.branch.current
-    return branch ? `${directory}:${branch}` : directory
+    const session = props.sessionID ? data.session.get(props.sessionID) : undefined
+    return promptLocationLabel(session ? displayLabel(session) : undefined, location.directory)
   })
   const [locationWidth, setLocationWidth] = createSignal(dimensions().width)
   const locationLabelDisplay = createMemo(() => {

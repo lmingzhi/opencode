@@ -30,3 +30,7 @@ test("truncates text in the middle without overflowing small widths", () => {
   expect(Locale.truncateMiddle("abcd", 10)).toBe("abcd")
   expect(Locale.truncateMiddle("a", 1)).toBe("a")
 })
+
+test("formats the compact footer timestamp as local ISO time", () => {
+  expect(Locale.localTimestamp(new Date(2026, 10, 5, 12, 13, 17).getTime())).toBe("2026-11-05T12:13:17")
+})

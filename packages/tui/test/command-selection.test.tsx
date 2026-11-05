@@ -61,7 +61,7 @@ test("custom commands commit the captured agent, model and variant before execut
   })
   try {
     await setup.ready
-    await setup.waitForFrame((frame) => frame.includes("Build · first model"))
+    await setup.waitForFrame((frame) => frame.includes("first model"))
     setup.mockInput.pressKey("F6")
     await setup.waitForFrame((frame) => frame.includes("Plan ·"))
     setup.mockInput.pressKey("F8")

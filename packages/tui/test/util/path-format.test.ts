@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { formatPath } from "../../src/util/path-format"
+import { formatPath, promptLocationLabel } from "../../src/util/path-format"
 
 test("formats relative, home, and foreign paths", () => {
   expect(formatPath(".", { base: "/work/project" })).toBe(".")
@@ -12,4 +12,16 @@ test("formats relative, home, and foreign paths", () => {
     "C:/work/shared/a.ts",
   )
   expect(formatPath("C:\\Users\\test\\project", { base: "C:\\work", home: "C:\\Users\\test" })).toBe("~/project")
+})
+
+test("puts the session title before the directory basename in the prompt footer", () => {
+  expect(promptLocationLabel("Demo session", "/Users/me/work/iflyplus")).toBe("Demo session · iflyplus")
+  expect(promptLocationLabel(undefined, "/Users/me/work/iflyplus")).toBe("iflyplus")
+  expect(promptLocationLabel("Demo session", "/")).toBe("Demo session · /")
+})
+
+test("truncates a long session title without hiding the directory basename", () => {
+  expect(promptLocationLabel("a-very-long-session-title-that-does-not-fit", "/workspace")).toBe(
+    "a-very-long-session… · workspace",
+  )
 })

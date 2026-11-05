@@ -2001,7 +2001,6 @@ function AssistantFooter(props: { message: SessionMessageAssistant }) {
   const ctx = use()
   const config = useConfig()
   const data = useData()
-  const local = useLocal()
   const theme = useTheme()
   const model = createMemo(
     () =>
@@ -2017,6 +2016,17 @@ function AssistantFooter(props: { message: SessionMessageAssistant }) {
   const interrupted = createMemo(() => props.message.error?.message === "Step interrupted")
   const freeLimit = createMemo(() => props.message.error?.type === "provider.free-limit")
   const limitNotice = useLimitNotice(() => props.message)
+  const details = createMemo(() => {
+    const out: string[] = []
+    if (ctx.terminal.width >= 28) out.push(model())
+    if (duration() && (ctx.terminal.width < 28 || ctx.terminal.width >= 36)) out.push(Locale.duration(duration()))
+    const tps = tokensPerSecond()
+    if (config.data.session.tps && tps) out.push(`${tps.toFixed(1)} tok/s`)
+    if (interrupted()) out.push("interrupted")
+    const completed = props.message.time.completed
+    if (completed !== undefined) out.push(Locale.localTimestamp(completed))
+    return out
+  })
   return (
     <>
       <Show when={props.message.error && !interrupted() && !props.message.retry}>
@@ -2035,23 +2045,7 @@ function AssistantFooter(props: { message: SessionMessageAssistant }) {
       </Show>
       <AssistantRetry retry={props.message.retry} />
       <box paddingLeft={3} marginTop={props.message.retry || (props.message.error && !interrupted()) ? 1 : 0}>
-        <text>
-          <span style={{ fg: props.message.error ? theme.text.muted : local.agent.color(props.message.agent) }}>
-            {Locale.titlecase(props.message.agent)}
-          </span>
-          <Show when={ctx.terminal.width >= 28}>
-            <span style={{ fg: theme.text.muted }}> · {model()}</span>
-          </Show>
-          <Show when={duration() && (ctx.terminal.width < 28 || ctx.terminal.width >= 36)}>
-            <span style={{ fg: theme.text.muted }}> · {Locale.duration(duration())}</span>
-          </Show>
-          <Show when={config.data.session.tps && tokensPerSecond()}>
-            {(value) => <span style={{ fg: theme.text.muted }}> · {value().toFixed(1)} tok/s</span>}
-          </Show>
-          <Show when={interrupted()}>
-            <span style={{ fg: theme.text.muted }}> · interrupted</span>
-          </Show>
-        </text>
+        <text fg={theme.text.muted}>{details().join(" · ")}</text>
       </box>
     </>
   )

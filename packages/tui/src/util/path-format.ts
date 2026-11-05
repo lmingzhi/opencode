@@ -1,4 +1,12 @@
 import path from "path"
+import { truncateWidth } from "./locale"
+
+/** Bottom-left prompt footer label: session title first, then the directory basename. */
+export function promptLocationLabel(title: string | undefined, directory: string, titleWidth = 20) {
+  const basename = path.basename(directory) || directory
+  if (!title) return basename
+  return `${truncateWidth(title, titleWidth)} · ${basename}`
+}
 
 export function abbreviateHome(input: string, home: string) {
   if (!home) return input

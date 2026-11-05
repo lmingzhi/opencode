@@ -16,6 +16,15 @@ export function datetime(input: number): string {
   return `${localTime} · ${localDate}`
 }
 
+/** TUI footer 用的完整 ISO 本地时间：YYYY-MM-DDTHH:mm:ss（无时区后缀）。 */
+export function localTimestamp(input: number): string {
+  const date = new Date(input)
+  const pad = (value: number) => String(value).padStart(2, "0")
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
+    date.getHours(),
+  )}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
 export function number(num: number): string {
   // 999950+ would round to "1000.0K"
   if (num >= 999950) {
