@@ -1999,7 +1999,6 @@ function SessionPartView(props: {
 
 function AssistantFooter(props: { message: SessionMessageAssistant }) {
   const ctx = use()
-  const config = useConfig()
   const data = useData()
   const theme = useTheme()
   const model = createMemo(
@@ -2021,7 +2020,7 @@ function AssistantFooter(props: { message: SessionMessageAssistant }) {
     if (ctx.terminal.width >= 28) out.push(model())
     if (duration() && (ctx.terminal.width < 28 || ctx.terminal.width >= 36)) out.push(Locale.duration(duration()))
     const tps = tokensPerSecond()
-    if (config.data.session.tps && tps) out.push(`${tps.toFixed(1)} tok/s`)
+    if (tps) out.push(`${tps.toFixed(1)} tok/s`)
     if (interrupted()) out.push("interrupted")
     const completed = props.message.time.completed
     if (completed !== undefined) out.push(Locale.localTimestamp(completed))
